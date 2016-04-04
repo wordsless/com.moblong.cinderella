@@ -68,21 +68,14 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 						byte[] body = delivery.getBody();
 						String msg = new String(body, "UTF-8");
 						Whistle<String> whistle = gson.fromJson(msg, new TypeToken<Whistle<String>>() {}.getType());
+						System.out.println("recive:"+gson.toJson(whistle));
 						if(observer != null)
 							observer.recived(whistle);
 						Thread.yield();
 					}
 					channel.close();
 					channel = null;
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (ShutdownSignalException e) {
-					e.printStackTrace();
-				} catch (ConsumerCancelledException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} catch (TimeoutException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

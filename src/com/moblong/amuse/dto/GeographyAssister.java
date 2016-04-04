@@ -22,18 +22,26 @@ public final class GeographyAssister {
 		try {
 			con = ds.getConnection();
 			con.setAutoCommit(false);
-			pstate = con.prepareStatement("UPDATE t_location_realtime SET location = ST_SetSRID(ST_MakePoint(?, ?) WHERE aid = ?");
-			pstate.setDouble(1, latitude);
-			pstate.setDouble(2, longitude);
-			pstate.setString(3, aid);
+			StringBuilder sb = new StringBuilder("UPDATE t_location_realtime SET location = 'POINT(");
+			sb.append(latitude);
+			sb.append(' ');
+			sb.append(longitude);
+			sb.append(")':: geometry WHERE aid = ");
+			sb.append(aid);
+			pstate = con.prepareStatement(sb.toString());
 			pstate.execute();
 			pstate.close();
 			pstate = null;
 			
-			pstate = con.prepareStatement("INSERT INTO t_location_history(aid, location) VALUES(?, ST_SetSRID(ST_MakePoint(?, ?), 4326))");
-			pstate.setString(1, aid);
-			pstate.setDouble(2, latitude);
-			pstate.setDouble(3, longitude);
+			sb = new StringBuilder("INSERT INTO t_location_history(aid, location) VALUES(");
+			sb.append(aid);
+			sb.append(',');
+			sb.append("'POINT(");
+			sb.append(latitude);
+			sb.append(' ');
+			sb.append(longitude);
+			sb.append(")':: geometry)");
+			pstate = con.prepareStatement(sb.toString());
 			pstate.execute();
 			pstate.close();
 			pstate = null;
@@ -65,7 +73,22 @@ public final class GeographyAssister {
 	}	
 	
 	public List<Account> nearby(final ApplicationContext context, final String aid, final double latitude, final double longitude, final double radius) {
-		String sql = "SELECT base.aid, base.alias, base.telephone, base.registered, base.lastest, base.signature, base.ppid, base.type, base.uid, nearby.distance FROM t_account_base AS base, (SELECT aid, ST_Distance('POINT(? ?)', location) AS distance FROM t_location_realtime WHERE aid <> ? AND distance <= ? ORDER BY distance LIMIT 1000) AS nearby WHERE base.aid = nearby.aid";
+		String sql = String.format("SELECT "
+				+ "base.aid, "
+				+ "base.alias, "
+				+ "base.telephone, "
+				+ "base.registered, "
+				+ "base.lastest, "
+				+ "base.signature, "
+				+ "base.ppid, "
+				+ "base.type, "
+				+ "base.uid, "
+				+ "nearby.distance "
+				+ "FROM "
+				+ "t_account_base AS base, "
+				+ "(SELECT aid, ST_Distance('POINT(? ?)', location) AS distance FROM t_location_realtime WHERE aid <> ? "
+				+ "ORDER BY distance LIMIT 1000) AS nearby "
+				+ "WHERE base.aid = nearby.aid AND distance < ?", new Object[]{new Double(latitude), new Double(longitude), aid, new Double(radius)});
 		List<Account> nearby = new ArrayList<Account>();
 		DataSource ds = context.getBean("ds", DataSource.class);
 		Connection con = null;
@@ -75,10 +98,6 @@ public final class GeographyAssister {
 			con = ds.getConnection();
 			con.setAutoCommit(false);
 			pstate = con.prepareStatement(sql);
-			pstate.setDouble(1, latitude);
-			pstate.setDouble(2, longitude);
-			pstate.setString(3, aid);
-			pstate.setDouble(4, radius);
 			pstate.execute();
 			rs = pstate.getResultSet();
 			while(rs.next()) {
