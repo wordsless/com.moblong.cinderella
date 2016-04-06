@@ -92,8 +92,8 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 					while(alive) {
 						Whistle<?> whistle = queue.poll();
 						if(whistle != null) {
-							channel.queueDeclare(whistle.getTarget(), false, false, false, null);
-							channel.basicPublish("", whistle.getTarget(), MessageProperties.TEXT_PLAIN, gson.toJson(whistle).getBytes("UTF-8"));
+							channel.queueDeclare(whistle.getRecipient(), false, false, false, null);
+							channel.basicPublish("", whistle.getRecipient(), MessageProperties.TEXT_PLAIN, gson.toJson(whistle).getBytes("UTF-8"));
 							channel.waitForConfirms(1000L);
 						}
 						Thread.yield();

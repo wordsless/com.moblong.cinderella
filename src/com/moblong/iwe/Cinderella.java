@@ -29,11 +29,11 @@ public final class Cinderella implements IRecivedListener<Whistle<?>> {
 				if(whistle.getAction().equals(Constants.ACTION_SUBMIT_LOCATION)) {
 					GeographyAssister geographyDTO = context.getBean("GeographyDTO", GeographyAssister.class);
 					double[] position = gson.fromJson((String) whistle.getContent(), new TypeToken<double[]>(){}.getType());
-					List<Account> nearby = geographyDTO.nearby(context, whistle.getSource(), position[0], position[1], 1000);
+					List<Account> nearby = geographyDTO.nearby(context, whistle.getInitiator(), position[0], position[1], 1000);
 					Whistle<List<Account>> newWhistle = new Whistle<List<Account>>();
 					newWhistle.setAction(Constants.ACTION_NEIGHBORHOOD);
-					newWhistle.setSource(Constants.LCN);
-					newWhistle.setTarget(whistle.getSource());
+					newWhistle.setInitiator(Constants.LCN);
+					newWhistle.setRecipient(whistle.getInitiator());
 					newWhistle.setContent(nearby);
 					iwe.send(newWhistle);
 				}

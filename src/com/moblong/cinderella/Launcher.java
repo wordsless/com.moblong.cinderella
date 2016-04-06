@@ -33,18 +33,18 @@ public final class Launcher {
 							@Override
 							public void run() {
 								Gson gson = new Gson();
-								final String aid = whistle.getSource();
+								final String aid = whistle.getInitiator();
 								final double[] position = gson.fromJson((String) whistle.getContent(), new TypeToken<double[]>(){}.getType());
 								GeographyAssister assister = context.getBean("GeographyAssister", GeographyAssister.class);
 								assister.update(context, aid, position[0], position[1]);
 								
 								List<Account> neighbors = assister.nearby(context, aid, position[0], position[1], 1000);
 								Whistle<List<Account>> resp = new Whistle<List<Account>>();
-								resp.setSource(Constants.LCN);
-								resp.setTarget(aid);
+								resp.setInitiator(Constants.LCN);
+								resp.setRecipient(aid);
 								resp.setAction(Constants.ACTION_NEIGHBORHOOD);
 								resp.setBroadcast(false);
-								resp.setConsumed(false);
+								resp.setConsumed(Constants.WHISTLECONTROLLER_UNCONSUMED);
 								resp.setContent(neighbors);
 								iwe.send(resp);
 							}
