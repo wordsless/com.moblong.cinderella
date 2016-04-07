@@ -6,5 +6,5 @@ import com.moblong.flipped.model.Whistle;
 
 public interface IOnDialoguesChanged {
 
-	public void onChanged(KeyValuePair<Account, Whistle<?>> dialogue);
+	public void onChanged(KeyValuePair<Account, Whistle> dialogue);
 }

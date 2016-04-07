@@ -23,10 +23,10 @@ public final class Launcher {
 		final ImmediatelyWhistleEngine iwe = new ImmediatelyWhistleEngine();
 		try {
 			iwe.init(Constants.LCN, "push.tlthsc.com", 5672);
-			iwe.startup(new IRecivedListener<Whistle<?>>() {
+			iwe.startup(new IRecivedListener<Whistle>() {
 
 				@Override
-				public boolean recived(Whistle<?> whistle) {
+				public boolean recived(Whistle whistle) {
 					if(whistle.getAction().equals(Constants.ACTION_SUBMIT_LOCATION)) {
 						Thread update = new Thread(new Runnable() {
 
@@ -39,7 +39,7 @@ public final class Launcher {
 								assister.update(context, aid, position[0], position[1]);
 								
 								List<Account> neighbors = assister.nearby(context, aid, position[0], position[1], 1000);
-								Whistle<List<Account>> resp = new Whistle<List<Account>>();
+								Whistle resp = new Whistle();
 								resp.setInitiator(Constants.LCN);
 								resp.setRecipient(aid);
 								resp.setAction(Constants.ACTION_NEIGHBORHOOD);

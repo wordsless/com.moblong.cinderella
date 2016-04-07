@@ -26,15 +26,18 @@ public final class GeographyAssister {
 			sb.append(latitude);
 			sb.append(' ');
 			sb.append(longitude);
-			sb.append(")':: geometry WHERE aid = ");
+			sb.append(")':: geometry WHERE aid = \'");
 			sb.append(aid);
+			sb.append('\'');
 			pstate = con.prepareStatement(sb.toString());
 			pstate.execute();
 			pstate.close();
 			pstate = null;
 			
 			sb = new StringBuilder("INSERT INTO t_location_history(aid, location) VALUES(");
+			sb.append('\'');
 			sb.append(aid);
+			sb.append('\'');
 			sb.append(',');
 			sb.append("'POINT(");
 			sb.append(latitude);
@@ -72,7 +75,7 @@ public final class GeographyAssister {
 		}
 	}	
 	
-	public List<Account> nearby(final ApplicationContext context, final String aid, final double latitude, final double longitude, final double radius) {
+	public List<Account> nearby(final ApplicationContext context, final String aid, final double latitude, final double longitude, final int radius) {
 		String sql = String.format("SELECT "
 				+ "base.aid, "
 				+ "base.alias, "
@@ -86,9 +89,9 @@ public final class GeographyAssister {
 				+ "nearby.distance "
 				+ "FROM "
 				+ "t_account_base AS base, "
-				+ "(SELECT aid, ST_Distance('POINT(? ?)', location) AS distance FROM t_location_realtime WHERE aid <> ? "
+				+ "(SELECT aid, ST_Distance('POINT(%s %s)', location) AS distance FROM t_location_realtime WHERE aid <> '%s' "
 				+ "ORDER BY distance LIMIT 1000) AS nearby "
-				+ "WHERE base.aid = nearby.aid AND distance < ?", new Object[]{new Double(latitude), new Double(longitude), aid, new Double(radius)});
+				+ "WHERE base.aid = nearby.aid AND distance < %s", new Object[]{new Double(latitude), new Double(longitude), aid, new Integer(radius)});
 		List<Account> nearby = new ArrayList<Account>();
 		DataSource ds = context.getBean("ds", DataSource.class);
 		Connection con = null;
@@ -97,6 +100,7 @@ public final class GeographyAssister {
 		try {
 			con = ds.getConnection();
 			con.setAutoCommit(false);
+			System.out.println(sql);
 			pstate = con.prepareStatement(sql);
 			pstate.execute();
 			rs = pstate.getResultSet();

@@ -7,31 +7,28 @@ import java.util.concurrent.TimeoutException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.moblong.flipped.model.Whistle;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.MessageProperties;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
-import com.rabbitmq.client.ShutdownSignalException;
 
 public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngine {
 
 	private boolean alive = false;
 
-	private IRecivedListener<Whistle<?>> observer;
+	private IRecivedListener<Whistle> observer;
 	
-	private BlockingQueue<Whistle<?>> queue;
+	private BlockingQueue<Whistle> queue;
 
-	private IDetegater<IRecivedListener<Whistle<?>>> starter, closer; 
+	private IDetegater<IRecivedListener<Whistle>> starter, closer; 
 	
 	private Thread reciver, sender;
 
 	@Override
-	public void send(final Whistle<?> whistle) {
+	public void send(final Whistle whistle) {
 		try {
 			queue.put(whistle);
 		} catch (InterruptedException e) {
@@ -45,7 +42,7 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 		factory.setAutomaticRecoveryEnabled(false);
 		factory.setHost(host);
 		factory.setPort(port);
-		queue = new ArrayBlockingQueue<Whistle<?>>(128);
+		queue = new ArrayBlockingQueue<Whistle>(128);
 		
 		final Connection con = factory.newConnection();
 		final Gson gson = new GsonBuilder()
@@ -67,7 +64,7 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 						Delivery delivery = consumer.nextDelivery();
 						byte[] body = delivery.getBody();
 						String msg = new String(body, "UTF-8");
-						Whistle<String> whistle = gson.fromJson(msg, new TypeToken<Whistle<String>>() {}.getType());
+						Whistle whistle = gson.fromJson(msg, Whistle.class);
 						System.out.println("recive:"+gson.toJson(whistle));
 						if(observer != null)
 							observer.recived(whistle);
@@ -90,19 +87,16 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 				try {
 					channel = con.createChannel();
 					while(alive) {
-						Whistle<?> whistle = queue.poll();
+						Whistle whistle = queue.poll();
 						if(whistle != null) {
 							channel.queueDeclare(whistle.getRecipient(), false, false, false, null);
 							channel.basicPublish("", whistle.getRecipient(), MessageProperties.TEXT_PLAIN, gson.toJson(whistle).getBytes("UTF-8"));
-							channel.waitForConfirms(1000L);
 						}
 						Thread.yield();
 					}
 					channel.close();
 					channel = null;
 				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} catch (TimeoutException e) {
 					e.printStackTrace();
@@ -111,10 +105,10 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 			
 		});
 		
-		starter = new IDetegater<IRecivedListener<Whistle<?>>>() {
+		starter = new IDetegater<IRecivedListener<Whistle>>() {
 
 			@Override
-			public void detegate(IRecivedListener<Whistle<?>> observer) {
+			public void detegate(IRecivedListener<Whistle> observer) {
 				
 				alive = true;
 				
@@ -131,10 +125,10 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 			
 		};
 		
-		closer = new IDetegater<IRecivedListener<Whistle<?>>>() {
+		closer = new IDetegater<IRecivedListener<Whistle>>() {
 
 			@Override
-			public void detegate(IRecivedListener<Whistle<?>> observer) {
+			public void detegate(IRecivedListener<Whistle> observer) {
 				
 				alive = false;
 				
@@ -162,7 +156,7 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 	}
 	
 	@Override
-	public void startup(IRecivedListener<Whistle<?>> listener) {
+	public void startup(IRecivedListener<Whistle> listener) {
 		starter.detegate(listener);
 	}
 	

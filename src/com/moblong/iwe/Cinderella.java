@@ -12,9 +12,9 @@ import com.moblong.flipped.model.Account;
 import com.moblong.flipped.model.Constants;
 import com.moblong.flipped.model.Whistle;
 
-public final class Cinderella implements IRecivedListener<Whistle<?>> {
+public final class Cinderella implements IRecivedListener<Whistle> {
 	
-	private IRecivedListener<Whistle<?>> reciver;
+	private IRecivedListener<Whistle> reciver;
 	
 	public void init(final ApplicationContext context, final IImmediatelyWhistlerEngine iwe) {
 		
@@ -22,15 +22,15 @@ public final class Cinderella implements IRecivedListener<Whistle<?>> {
 				.setDateFormat("yyyy-MM-dd HH:mm:ss")
 				.create();
 		
-		reciver = new IRecivedListener<Whistle<?>>() {
+		reciver = new IRecivedListener<Whistle>() {
 
 			@Override
-			public boolean recived(Whistle<?> whistle) {
+			public boolean recived(Whistle whistle) {
 				if(whistle.getAction().equals(Constants.ACTION_SUBMIT_LOCATION)) {
 					GeographyAssister geographyDTO = context.getBean("GeographyDTO", GeographyAssister.class);
 					double[] position = gson.fromJson((String) whistle.getContent(), new TypeToken<double[]>(){}.getType());
 					List<Account> nearby = geographyDTO.nearby(context, whistle.getInitiator(), position[0], position[1], 1000);
-					Whistle<List<Account>> newWhistle = new Whistle<List<Account>>();
+					Whistle newWhistle = new Whistle();
 					newWhistle.setAction(Constants.ACTION_NEIGHBORHOOD);
 					newWhistle.setInitiator(Constants.LCN);
 					newWhistle.setRecipient(whistle.getInitiator());
@@ -43,7 +43,7 @@ public final class Cinderella implements IRecivedListener<Whistle<?>> {
 	}
 	
 	@Override
-	public boolean recived(Whistle<?> whistle) {
+	public boolean recived(Whistle whistle) {
 		return reciver.recived(whistle);
 	}
 
