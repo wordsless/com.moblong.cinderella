@@ -12,7 +12,7 @@ import com.moblong.flipped.model.Account;
 import com.moblong.flipped.model.Constants;
 import com.moblong.flipped.model.Whistle;
 
-public final class Cinderella implements IRecivedListener<Whistle> {
+public final class Merlin implements IRecivedListener<Whistle> {
 	
 	private IRecivedListener<Whistle> reciver;
 	

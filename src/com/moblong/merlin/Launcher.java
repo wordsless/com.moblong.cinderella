@@ -1,4 +1,4 @@
-package com.moblong.cinderella;
+package com.moblong.merlin;
 
 import java.io.IOException;
 import java.util.List;
