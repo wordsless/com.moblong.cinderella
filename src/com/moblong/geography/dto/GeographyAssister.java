@@ -1,4 +1,4 @@
-package com.moblong.amuse.dto;
+package com.moblong.geography.dto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,33 +18,21 @@ public final class GeographyAssister {
 	public void update(final ApplicationContext context, final String aid, final double latitude, final double longitude) {
 		DataSource  ds = context.getBean("ds", DataSource.class);
 		Connection con = null;
+		ResultSet rs = null;
 		PreparedStatement pstate = null;
+		String sql = null;
 		try {
 			con = ds.getConnection();
 			con.setAutoCommit(false);
-			StringBuilder sb = new StringBuilder("UPDATE t_location_realtime SET location = 'POINT(");
-			sb.append(latitude);
-			sb.append(' ');
-			sb.append(longitude);
-			sb.append(")':: geometry WHERE aid = \'");
-			sb.append(aid);
-			sb.append('\'');
-			pstate = con.prepareStatement(sb.toString());
+			
+			sql = String.format("UPDATE t_location_realtime SET location = 'POINT(%s %s)':: geometry WHERE aid = '%s'", new Object[]{latitude, longitude, aid});
+			pstate = con.prepareStatement(sql);
 			pstate.execute();
 			pstate.close();
 			pstate = null;
 			
-			sb = new StringBuilder("INSERT INTO t_location_history(aid, location) VALUES(");
-			sb.append('\'');
-			sb.append(aid);
-			sb.append('\'');
-			sb.append(',');
-			sb.append("'POINT(");
-			sb.append(latitude);
-			sb.append(' ');
-			sb.append(longitude);
-			sb.append(")':: geometry)");
-			pstate = con.prepareStatement(sb.toString());
+			sql = String.format("INSERT INTO t_location_history(aid, location) VALUES('%s', 'POINT(%s %s)::geometry')", new Object[]{aid, latitude, longitude});
+			pstate = con.prepareStatement(sql);
 			pstate.execute();
 			pstate.close();
 			pstate = null;
@@ -75,6 +63,50 @@ public final class GeographyAssister {
 		}
 	}	
 	
+	public void register(final ApplicationContext context, final String aid, final double latitude, final double longitude) {
+		DataSource  ds = context.getBean("ds", DataSource.class);
+		Connection con = null;
+		ResultSet rs = null;
+		PreparedStatement pstate = null;
+		String sql = null;
+		try {
+			con = ds.getConnection();
+			con.setAutoCommit(false);
+			
+			sql = String.format("INSERT INTO t_location_realtime(aid, location) VALUES('%s', 'POINT(%s %s)::geometry')", new Object[]{aid, latitude, longitude});
+			System.out.println(sql);
+			pstate = con.prepareStatement(sql);
+			pstate.execute();
+			pstate.close();
+			pstate = null;
+			
+			con.commit();
+			con.close();
+			con = null;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(pstate != null) {
+				try {
+					pstate.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				pstate = null;
+			}
+			
+			if(con != null) {
+				try {
+					con.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				con = null;
+			}
+		}
+	
+	}
+	
 	public List<Account> nearby(final ApplicationContext context, final String aid, final double latitude, final double longitude, final int radius) {
 		String sql = String.format("SELECT "
 				+ "base.aid, "
@@ -100,22 +132,49 @@ public final class GeographyAssister {
 		try {
 			con = ds.getConnection();
 			con.setAutoCommit(false);
-			System.out.println(sql);
+			//System.out.println(sql);
 			pstate = con.prepareStatement(sql);
 			pstate.execute();
 			rs = pstate.getResultSet();
 			while(rs.next()) {
 				Account account = new Account();
 				account = new Account();
-				account.setId(rs.getString(1).trim());
-				account.setAlias(rs.getString(2).trim());
-				account.setTelephone(rs.getString(3).trim());
-				account.setRegistered(new java.util.Date(rs.getDate(4).getTime()));
-				account.setLast(new java.util.Date(rs.getDate(5).getTime()));
-				account.setSignature(rs.getString(6).trim());
-				account.setAvatar(rs.getString(7).trim());
-				account.setType(rs.getString(8));
-				account.setUid(rs.getString(9));
+				String id = rs.getString(1);
+				if(id != null)
+					account.setId(id.trim());
+				
+				String alias = rs.getString(2);
+				if(alias != null)
+					account.setAlias(alias.trim());
+				
+				String telephone = rs.getString(3);
+				if(telephone != null)
+					account.setTelephone(telephone.trim());
+				
+				java.sql.Date reg = rs.getDate(4);
+				if(reg != null)
+					account.setRegistered(new java.util.Date(rs.getDate(4).getTime()));
+				
+				java.sql.Date last = rs.getDate(4);
+				if(last != null)
+					account.setLast(new java.util.Date(last.getTime()));
+				
+				String signature = rs.getString(6);
+				if(signature != null)
+					account.setSignature(signature.trim());
+				
+				String avatar = rs.getString(7);
+				if(avatar != null)
+					account.setAvatar(avatar.trim());
+				
+				String type = rs.getString(8);
+				if(type != null)
+					account.setType(type.trim());
+				
+				String uid = rs.getString(9);
+				if(uid != null)
+					account.setUid(uid.trim());
+				
 				account.setDistance(rs.getInt(10));
 				nearby.add(account);
 			}

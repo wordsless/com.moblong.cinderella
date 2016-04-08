@@ -1,4 +1,4 @@
-package com.moblong.amuse.dto;
+package com.moblong.geography.dto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

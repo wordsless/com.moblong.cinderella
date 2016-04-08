@@ -19,11 +19,11 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 
 	private boolean alive = false;
 
-	private IRecivedListener<Whistle> observer;
+	private IWhistleServlet observer;
 	
 	private BlockingQueue<Whistle> queue;
 
-	private IDetegater<IRecivedListener<Whistle>> starter, closer; 
+	private IDetegater<IWhistleServlet> starter, closer; 
 	
 	private Thread reciver, sender;
 
@@ -67,7 +67,7 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 						Whistle whistle = gson.fromJson(msg, Whistle.class);
 						System.out.println("recive:"+gson.toJson(whistle));
 						if(observer != null)
-							observer.recived(whistle);
+							observer.recived(whistle, queue);
 						Thread.yield();
 					}
 					channel.close();
@@ -105,10 +105,10 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 			
 		});
 		
-		starter = new IDetegater<IRecivedListener<Whistle>>() {
+		starter = new IDetegater<IWhistleServlet>() {
 
 			@Override
-			public void detegate(IRecivedListener<Whistle> observer) {
+			public void detegate(IWhistleServlet observer) {
 				
 				alive = true;
 				
@@ -125,10 +125,10 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 			
 		};
 		
-		closer = new IDetegater<IRecivedListener<Whistle>>() {
+		closer = new IDetegater<IWhistleServlet>() {
 
 			@Override
-			public void detegate(IRecivedListener<Whistle> observer) {
+			public void detegate(IWhistleServlet observer) {
 				
 				alive = false;
 				
@@ -156,7 +156,7 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 	}
 	
 	@Override
-	public void startup(IRecivedListener<Whistle> listener) {
+	public void startup(IWhistleServlet listener) {
 		starter.detegate(listener);
 	}
 	

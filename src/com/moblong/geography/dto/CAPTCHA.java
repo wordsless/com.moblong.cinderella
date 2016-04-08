@@ -1,4 +1,4 @@
-package com.moblong.amuse.dto;
+package com.moblong.geography.dto;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

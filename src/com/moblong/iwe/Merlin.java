@@ -7,10 +7,10 @@ import org.springframework.context.ApplicationContext;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.moblong.amuse.dto.GeographyAssister;
 import com.moblong.flipped.model.Account;
 import com.moblong.flipped.model.Constants;
 import com.moblong.flipped.model.Whistle;
+import com.moblong.geography.dto.GeographyAssister;
 
 public final class Merlin implements IRecivedListener<Whistle> {
 	

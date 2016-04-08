@@ -11,7 +11,7 @@ public interface IImmediatelyWhistlerEngine {
 
 	public void init(String id, String host, int port) throws IOException, TimeoutException;
 
-	public void startup(IRecivedListener<Whistle> observer);
+	public void startup(IWhistleServlet observer);
 
 	public void shutdown();
 
