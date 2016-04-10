@@ -70,10 +70,23 @@ public final class GeographyAssister {
 		PreparedStatement pstate = null;
 		String sql = null;
 		try {
+			boolean exist = false;
 			con = ds.getConnection();
 			con.setAutoCommit(false);
+			sql = String.format("SELECT COUNT(1) FROM t_location_realtime WHERE aid = '%s'", aid);
+			pstate = con.prepareStatement(sql);
+			pstate.execute();
+			rs = pstate.getResultSet();
+			if(rs.next()) {
+				exist = rs.getInt(1) > 0;
+			}
+			pstate.close();
+			pstate = null;
 			
-			sql = String.format("INSERT INTO t_location_realtime(aid, location) VALUES('%s', 'POINT(%s %s)::geometry')", new Object[]{aid, latitude, longitude});
+			if(exist)
+				sql = String.format("UPDATE t_location_realtime SET location = 'POINT(%s %s)':: geometry WHERE aid = '%s'", new Object[]{latitude, longitude, aid});
+			else
+				sql = String.format("INSERT INTO t_location_realtime(aid, location) VALUES('%s', 'POINT(%s %s)::geometry')", new Object[]{aid, latitude, longitude});
 			System.out.println(sql);
 			pstate = con.prepareStatement(sql);
 			pstate.execute();

@@ -12,7 +12,7 @@ import com.moblong.flipped.model.Constants;
 import com.moblong.flipped.model.Whistle;
 import com.moblong.geography.dto.GeographyAssister;
 
-public final class Merlin implements IRecivedListener<Whistle> {
+public final class Geography implements IRecivedListener<Whistle> {
 	
 	private IRecivedListener<Whistle> reciver;
 	
@@ -31,10 +31,10 @@ public final class Merlin implements IRecivedListener<Whistle> {
 					double[] position = gson.fromJson((String) whistle.getContent(), new TypeToken<double[]>(){}.getType());
 					List<Account> nearby = geographyDTO.nearby(context, whistle.getInitiator(), position[0], position[1], 1000);
 					Whistle newWhistle = new Whistle();
-					newWhistle.setAction(Constants.ACTION_NEIGHBORHOOD);
+					newWhistle.setAction(Constants.ACTION_REQUEST_CONTACTS);
 					newWhistle.setInitiator(Constants.LCN);
 					newWhistle.setRecipient(whistle.getInitiator());
-					newWhistle.setContent(nearby);
+					newWhistle.setContent(gson.toJson(nearby));
 					iwe.send(newWhistle);
 				}
 				return false;

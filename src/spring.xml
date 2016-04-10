@@ -62,5 +62,5 @@
 	<bean id="AccountDTO" class="com.moblong.amuse.dto.AccountDTO"/>
 	<bean id="DetailsDTO" class="com.moblong.amuse.dto.DetailsDTO"/>
 	<bean id="MaterialsDTO" class="com.moblong.amuse.dto.MaterialsDTO"/>
-	<bean id="GeographyAssister" class="com.moblong.amuse.dto.GeographyAssister"/>
+	<bean id="GeographyAssister" class="com.moblong.geography.dto.GeographyAssister"/>
 </beans>

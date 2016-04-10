@@ -10,6 +10,9 @@ import java.util.concurrent.TimeoutException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.moblong.flipped.model.Account;
 import com.moblong.flipped.model.Constants;
 import com.moblong.flipped.model.Whistle;
@@ -29,9 +32,12 @@ public final class Launcher {
 	private Integer concurrentCounter = 0;
 	
 	public void lanch() {
+		final Gson gson = new GsonBuilder()
+				.setDateFormat("yyyy-MM-dd HH:mm:ss")
+				.create();
 		final ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
 		final ImmediatelyWhistleEngine iwe = new ImmediatelyWhistleEngine();
-		final Map<String, IWhistleServlet> servlets = new TreeMap<String, IWhistleServlet>();
+		final Map<Long, IWhistleServlet> servlets = new TreeMap<Long, IWhistleServlet>();
 		try {
 			//添加注册消息处理器
 			servlets.put(Constants.ACTION_REGISTER, new IWhistleServlet() {
@@ -39,7 +45,7 @@ public final class Launcher {
 				@Override
 				public void recived(Whistle req, Queue<Whistle> resp) {
 					String            aid = req.getInitiator();
-					List<Double> position = (List<Double>) req.getContent();
+					List<Double> position = gson.fromJson(req.getContent(), new TypeToken<List<Double>>(){}.getType());
 					GeographyAssister assister = context.getBean("GeographyAssister", GeographyAssister.class);
 					assister.register(context, aid, position.get(0), position.get(1));
 					
@@ -47,10 +53,10 @@ public final class Launcher {
 					Whistle whistle = new Whistle();
 					whistle.setInitiator(Constants.LCN);
 					whistle.setRecipient(aid);
-					whistle.setAction(Constants.ACTION_NEIGHBORHOOD);
+					whistle.setAction(Constants.ACTION_REQUEST_CONTACTS);
 					whistle.setBroadcast(false);
 					whistle.setConsumed(Constants.WHISTLECONTROLLER_UNCONSUMED);
-					whistle.setContent(neighbors);
+					whistle.setContent(gson.toJson(neighbors));
 					resp.add(whistle);
 				}
 				
@@ -62,7 +68,7 @@ public final class Launcher {
 				@Override
 				public void recived(Whistle req, Queue<Whistle> resp) {
 					String        aid = req.getInitiator();
-					List<Double> position = (List<Double>) req.getContent();
+					List<Double> position = gson.fromJson(req.getContent(), new TypeToken<List<Double>>(){}.getType());
 					GeographyAssister assister = context.getBean("GeographyAssister", GeographyAssister.class);
 					assister.update(context, aid, position.get(0), position.get(1));
 					
@@ -70,10 +76,10 @@ public final class Launcher {
 					Whistle whistle = new Whistle();
 					whistle.setInitiator(Constants.LCN);
 					whistle.setRecipient(aid);
-					whistle.setAction(Constants.ACTION_NEIGHBORHOOD);
+					whistle.setAction(Constants.ACTION_REQUEST_CONTACTS);
 					whistle.setBroadcast(false);
 					whistle.setConsumed(Constants.WHISTLECONTROLLER_UNCONSUMED);
-					whistle.setContent(neighbors);
+					whistle.setContent(gson.toJson(neighbors));
 					resp.add(whistle);
 				}
 				
