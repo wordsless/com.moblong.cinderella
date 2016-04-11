@@ -63,9 +63,7 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 					while (alive) {
 						Delivery delivery = consumer.nextDelivery();
 						byte[] body = delivery.getBody();
-						String msg = new String(body, "UTF-8");
-						Whistle whistle = gson.fromJson(msg, Whistle.class);
-						System.out.println("recive:"+gson.toJson(whistle));
+						Whistle whistle = new Whistle(body);
 						if(observer != null)
 							observer.recived(whistle, queue);
 						Thread.yield();
@@ -90,7 +88,7 @@ public final class ImmediatelyWhistleEngine implements IImmediatelyWhistlerEngin
 						Whistle whistle = queue.poll();
 						if(whistle != null) {
 							channel.queueDeclare(whistle.getRecipient(), false, false, false, null);
-							channel.basicPublish("", whistle.getRecipient(), MessageProperties.TEXT_PLAIN, gson.toJson(whistle).getBytes("UTF-8"));
+							channel.basicPublish("", whistle.getRecipient(), MessageProperties.TEXT_PLAIN, whistle.serialize());
 						}
 						Thread.yield();
 					}
