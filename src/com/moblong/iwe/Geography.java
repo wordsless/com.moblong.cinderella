@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContext;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.moblong.flipped.model.Account;
+import com.moblong.flipped.model.Contact;
 import com.moblong.flipped.model.Constants;
 import com.moblong.flipped.model.Whistle;
 import com.moblong.geography.dto.GeographyAssister;
@@ -29,9 +29,9 @@ public final class Geography implements IRecivedListener<Whistle> {
 				if(whistle.getAction().equals(Constants.ACTION_SUBMIT_LOCATION)) {
 					GeographyAssister geographyDTO = context.getBean("GeographyDTO", GeographyAssister.class);
 					double[] position = gson.fromJson((String) whistle.getContent(), new TypeToken<double[]>(){}.getType());
-					List<Account> nearby = geographyDTO.nearby(context, whistle.getInitiator(), position[0], position[1], 1000);
+					List<Contact> nearby = geographyDTO.nearby(context, whistle.getInitiator(), position[0], position[1], 1000);
 					Whistle newWhistle = new Whistle();
-					newWhistle.setAction(Constants.ACTION_REQUEST_CONTACTS);
+					newWhistle.setAction(Constants.ACTION_ITERATE_NEARBY_CONTACTS);
 					newWhistle.setInitiator(Constants.LCN);
 					newWhistle.setRecipient(whistle.getInitiator());
 					newWhistle.setContent(gson.toJson(nearby));

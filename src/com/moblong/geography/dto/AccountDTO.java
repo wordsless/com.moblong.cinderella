@@ -11,13 +11,13 @@ import javax.sql.DataSource;
 
 import org.springframework.context.ApplicationContext;
 
-import com.moblong.flipped.model.Account;
+import com.moblong.flipped.model.Contact;
 
 public final class AccountDTO {
 
 	private static final int NUMBER_OF_PER_PAGE = 20;
 
-	public void save(final ApplicationContext context, final String uid, final String pwd, final Account account) {
+	public void save(final ApplicationContext context, final String uid, final String pwd, final Contact account) {
 		Connection con = null;
 		PreparedStatement pstat = null;
 		DataSource ds = context.getBean("ds", DataSource.class);
@@ -62,7 +62,7 @@ public final class AccountDTO {
 			pstat.setDouble(7, account.getLatitude());
 			pstat.setDouble(8, account.getLongitude());
 			pstat.setDate(9,   new java.sql.Date(account.getRegistered().getTime()));
-			pstat.setDate(10,  new java.sql.Date(account.getLast().getTime()));
+			pstat.setDate(10,  new java.sql.Date(account.getLatest().getTime()));
 			pstat.execute();
 			con.commit();
 			
@@ -94,8 +94,8 @@ public final class AccountDTO {
 		}
 	}
 	
-	public Account reload(final ApplicationContext context, final String aid) {
-		Account		    account = null;
+	public Contact reload(final ApplicationContext context, final String aid) {
+		Contact		    account = null;
 		Connection			con = null;
 		PreparedStatement pstat = null;
 		ResultSet			 rs = null;
@@ -107,12 +107,12 @@ public final class AccountDTO {
 			pstat.execute();
 			rs = pstat.getResultSet();
 			if(rs.next()) {
-				account = new Account();
+				account = new Contact();
 				account.setId(rs.getString("aid").trim());
 				account.setAlias(rs.getString("alias").trim());
 				account.setTelephone(rs.getString("telphone").trim());
 				account.setRegistered(new java.util.Date(rs.getDate("registered").getTime()));
-				account.setLast(new java.util.Date(rs.getDate("lastest").getTime()));
+				account.setLatest(new java.util.Date(rs.getDate("lastest").getTime()));
 				account.setSignature(rs.getString("signature").trim());
 				account.setAvatar(rs.getString("ppid").trim());
 			}
@@ -155,8 +155,8 @@ public final class AccountDTO {
 		return account;
 	}
 	
-	public Account signIn(final ApplicationContext context, final String telephone, final String password) {
-		Account		    account = null;
+	public Contact signIn(final ApplicationContext context, final String telephone, final String password) {
+		Contact		    account = null;
 		Connection			con = null;
 		PreparedStatement pstat = null;
 		ResultSet			 rs = null;
@@ -169,12 +169,12 @@ public final class AccountDTO {
 			pstat.execute();
 			rs = pstat.getResultSet();
 			if(rs.next()) {
-				account = new Account();
+				account = new Contact();
 				account.setId(rs.getString("aid").trim());
 				account.setAlias(rs.getString("alias").trim());
 				account.setTelephone(rs.getString("telephone").trim());
 				account.setRegistered(new java.util.Date(rs.getDate("registered").getTime()));
-				account.setLast(new java.util.Date(rs.getDate("lastest").getTime()));
+				account.setLatest(new java.util.Date(rs.getDate("lastest").getTime()));
 				account.setSignature(rs.getString("signature").trim());
 				account.setAvatar(rs.getString("ppid").trim());
 				account.setType(rs.getString("type"));
@@ -273,8 +273,8 @@ public final class AccountDTO {
 		return uid;
 	}
 	
-	public List<Account> candidate(final ApplicationContext context, final String aid, final int page) {
-		List<Account> candidates = new ArrayList<Account>();
+	public List<Contact> candidate(final ApplicationContext context, final String aid, final int page) {
+		List<Contact> candidates = new ArrayList<Contact>();
 		Connection con = null;
 		PreparedStatement pstat = null;
 		ResultSet rs = null;
@@ -289,11 +289,11 @@ public final class AccountDTO {
 			pstat.execute();
 			rs = pstat.getResultSet();
 			while(rs.next()) {
-				Account candidate = new Account();
+				Contact candidate = new Contact();
 				candidate.setId(rs.getString("aid").trim());
 				candidate.setAlias(rs.getString("alias").trim());
 				candidate.setRegistered(new java.util.Date(rs.getDate("registered").getTime()));
-				candidate.setLast(new java.util.Date(rs.getDate("lastest").getTime()));
+				candidate.setLatest(new java.util.Date(rs.getDate("lastest").getTime()));
 				candidate.setSignature(rs.getString("signature").trim());
 				candidate.setAvatar(rs.getString("ppid").trim());
 				candidates.add(candidate);
@@ -337,7 +337,7 @@ public final class AccountDTO {
 		return candidates;
 	}
 //4008109956
-	public void update(ApplicationContext context, Account account, final String password) {
+	public void update(ApplicationContext context, Contact account, final String password) {
 		Connection			con = null;
 		PreparedStatement pstat = null;
 		DataSource			 ds = context.getBean("ds", DataSource.class);

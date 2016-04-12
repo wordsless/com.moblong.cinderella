@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 
 import org.springframework.context.ApplicationContext;
 
-import com.moblong.flipped.model.Account;
+import com.moblong.flipped.model.Contact;
 
 public final class GeographyAssister {
 	
@@ -120,7 +120,7 @@ public final class GeographyAssister {
 	
 	}
 	
-	public List<Account> nearby(final ApplicationContext context, final String aid, final double latitude, final double longitude, final int radius) {
+	public List<Contact> nearby(final ApplicationContext context, final String aid, final double latitude, final double longitude, final int radius) {
 		String sql = String.format("SELECT "
 				+ "base.aid, "
 				+ "base.alias, "
@@ -137,7 +137,7 @@ public final class GeographyAssister {
 				+ "(SELECT aid, ST_Distance('POINT(%s %s)', location) AS distance FROM t_location_realtime WHERE aid <> '%s' "
 				+ "ORDER BY distance LIMIT 1000) AS nearby "
 				+ "WHERE base.aid = nearby.aid AND distance < %s", new Object[]{new Double(latitude), new Double(longitude), aid, new Integer(radius)});
-		List<Account> nearby = new ArrayList<Account>();
+		List<Contact> nearby = new ArrayList<Contact>();
 		DataSource ds = context.getBean("ds", DataSource.class);
 		Connection con = null;
 		PreparedStatement pstate = null;
@@ -150,8 +150,8 @@ public final class GeographyAssister {
 			pstate.execute();
 			rs = pstate.getResultSet();
 			while(rs.next()) {
-				Account account = new Account();
-				account = new Account();
+				Contact account = new Contact();
+				account = new Contact();
 				String id = rs.getString(1);
 				if(id != null)
 					account.setId(id.trim());
@@ -170,7 +170,7 @@ public final class GeographyAssister {
 				
 				java.sql.Date last = rs.getDate(4);
 				if(last != null)
-					account.setLast(new java.util.Date(last.getTime()));
+					account.setLatest(new java.util.Date(last.getTime()));
 				
 				String signature = rs.getString(6);
 				if(signature != null)

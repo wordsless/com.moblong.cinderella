@@ -13,7 +13,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.moblong.flipped.model.Account;
+import com.moblong.flipped.model.Contact;
 import com.moblong.flipped.model.Constants;
 import com.moblong.flipped.model.Whistle;
 import com.moblong.geography.dto.GeographyAssister;
@@ -49,11 +49,11 @@ public final class Launcher {
 					GeographyAssister assister = context.getBean("GeographyAssister", GeographyAssister.class);
 					assister.register(context, aid, position.get(0), position.get(1));
 					
-					List<Account> neighbors = assister.nearby(context, aid, position.get(0), position.get(1), 1000);
+					List<Contact> neighbors = assister.nearby(context, aid, position.get(0), position.get(1), 1000);
 					Whistle whistle = new Whistle();
 					whistle.setInitiator(Constants.LCN);
 					whistle.setRecipient(aid);
-					whistle.setAction(Constants.ACTION_REQUEST_CONTACTS);
+					whistle.setAction(Constants.ACTION_ITERATE_NEARBY_CONTACTS);
 					whistle.setBroadcast(false);
 					whistle.setConsumed(Constants.WHISTLECONTROLLER_UNCONSUMED);
 					whistle.setContent(gson.toJson(neighbors));
@@ -72,11 +72,11 @@ public final class Launcher {
 					GeographyAssister assister = context.getBean("GeographyAssister", GeographyAssister.class);
 					assister.update(context, aid, position.get(0), position.get(1));
 					
-					List<Account> neighbors = assister.nearby(context, aid, position.get(0), position.get(1), 1000);
+					List<Contact> neighbors = assister.nearby(context, aid, position.get(0), position.get(1), 1000);
 					Whistle whistle = new Whistle();
 					whistle.setInitiator(Constants.LCN);
 					whistle.setRecipient(aid);
-					whistle.setAction(Constants.ACTION_REQUEST_CONTACTS);
+					whistle.setAction(Constants.ACTION_ITERATE_NEARBY_CONTACTS);
 					whistle.setBroadcast(false);
 					whistle.setConsumed(Constants.WHISTLECONTROLLER_UNCONSUMED);
 					whistle.setContent(gson.toJson(neighbors));
