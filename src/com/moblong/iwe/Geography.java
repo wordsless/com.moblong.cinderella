@@ -10,7 +10,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moblong.flipped.model.Contact;
 import com.moblong.flipped.model.Constants;
 import com.moblong.flipped.model.Whistle;
-import com.moblong.geography.dto.GeographyAssister;
+import com.moblong.prophet.dto.GeographyAssister;
 
 public final class Geography implements IRecivedListener<Whistle> {
 	
@@ -32,7 +32,7 @@ public final class Geography implements IRecivedListener<Whistle> {
 					List<Contact> nearby = geographyDTO.nearby(context, whistle.getInitiator(), position[0], position[1], 1000);
 					Whistle newWhistle = new Whistle();
 					newWhistle.setAction(Constants.ACTION_ITERATE_NEARBY_CONTACTS);
-					newWhistle.setInitiator(Constants.LCN);
+					newWhistle.setInitiator(Constants.PROPHET);
 					newWhistle.setRecipient(whistle.getInitiator());
 					newWhistle.setContent(gson.toJson(nearby));
 					iwe.send(newWhistle);

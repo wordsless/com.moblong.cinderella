@@ -1,4 +1,4 @@
-package com.moblong.geography;
+package com.moblong.prophet;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,9 +16,9 @@ import com.google.gson.reflect.TypeToken;
 import com.moblong.flipped.model.Contact;
 import com.moblong.flipped.model.Constants;
 import com.moblong.flipped.model.Whistle;
-import com.moblong.geography.dto.GeographyAssister;
 import com.moblong.iwe.IWhistleServlet;
 import com.moblong.iwe.ImmediatelyWhistleEngine;
+import com.moblong.prophet.dto.GeographyAssister;
 
 public final class Launcher {
 
@@ -40,7 +40,7 @@ public final class Launcher {
 		final Map<Long, IWhistleServlet> servlets = new TreeMap<Long, IWhistleServlet>();
 		try {
 			//添加注册消息处理器
-			servlets.put(Constants.ACTION_REGISTER, new IWhistleServlet() {
+			servlets.put(Constants.ACTION_CONTACT_REGISTER, new IWhistleServlet() {
 
 				@Override
 				public void recived(Whistle req, Queue<Whistle> resp) {
@@ -51,7 +51,7 @@ public final class Launcher {
 					
 					List<Contact> neighbors = assister.nearby(context, aid, position.get(0), position.get(1), 1000);
 					Whistle whistle = new Whistle();
-					whistle.setInitiator(Constants.LCN);
+					whistle.setInitiator(Constants.PROPHET);
 					whistle.setRecipient(aid);
 					whistle.setAction(Constants.ACTION_ITERATE_NEARBY_CONTACTS);
 					whistle.setBroadcast(false);
@@ -59,7 +59,6 @@ public final class Launcher {
 					whistle.setContent(gson.toJson(neighbors));
 					resp.add(whistle);
 				}
-				
 			});
 			
 			//提交坐标
@@ -74,7 +73,7 @@ public final class Launcher {
 					
 					List<Contact> neighbors = assister.nearby(context, aid, position.get(0), position.get(1), 1000);
 					Whistle whistle = new Whistle();
-					whistle.setInitiator(Constants.LCN);
+					whistle.setInitiator(Constants.PROPHET);
 					whistle.setRecipient(aid);
 					whistle.setAction(Constants.ACTION_ITERATE_NEARBY_CONTACTS);
 					whistle.setBroadcast(false);
@@ -82,10 +81,31 @@ public final class Launcher {
 					whistle.setContent(gson.toJson(neighbors));
 					resp.add(whistle);
 				}
-				
 			});
 			
-			iwe.init(Constants.LCN, "push.tlthsc.com", 5672);
+			//提交坐标
+			servlets.put(Constants.ACTION_REQUEST_NEARBY_CONTACT, new IWhistleServlet() {
+
+				@Override
+				public void recived(Whistle req, Queue<Whistle> resp) {
+					String        aid = req.getInitiator();
+					List<Double> position = gson.fromJson(req.getContent(), new TypeToken<List<Double>>(){}.getType());
+					GeographyAssister assister = context.getBean("GeographyAssister", GeographyAssister.class);
+					assister.update(context, aid, position.get(0), position.get(1));
+					
+					List<Contact> neighbors = assister.nearby(context, aid, position.get(0), position.get(1), 1000);
+					Whistle whistle = new Whistle();
+					whistle.setInitiator(Constants.PROPHET);
+					whistle.setRecipient(aid);
+					whistle.setAction(Constants.ACTION_ITERATE_NEARBY_CONTACTS);
+					whistle.setBroadcast(false);
+					whistle.setConsumed(Constants.WHISTLECONTROLLER_UNCONSUMED);
+					whistle.setContent(gson.toJson(neighbors));
+					resp.add(whistle);
+				}
+			});
+			
+			iwe.init(Constants.PROPHET, "push.moblong.com", 5672);
 			iwe.startup(new IWhistleServlet() {
 
 				@Override
@@ -100,6 +120,7 @@ public final class Launcher {
 							synchronized (concurrentCounter) {
 								++concurrentCounter;
 							}
+							System.out.println(req.getAction());
 							IWhistleServlet servlet = servlets.get(req.getAction());
 							servlet.recived(req, resp);
 							synchronized (concurrentCounter) {

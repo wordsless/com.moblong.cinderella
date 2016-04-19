@@ -1,4 +1,4 @@
-package com.moblong.geography.dto;
+package com.moblong.prophet.dto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -136,7 +136,7 @@ public final class GeographyAssister {
 				+ "t_account_base AS base, "
 				+ "(SELECT aid, ST_Distance('POINT(%s %s)', location) AS distance FROM t_location_realtime WHERE aid <> '%s' "
 				+ "ORDER BY distance LIMIT 1000) AS nearby "
-				+ "WHERE base.aid = nearby.aid AND distance < %s", new Object[]{new Double(latitude), new Double(longitude), aid, new Integer(radius)});
+				+ "WHERE base.aid = nearby.aid", new Object[]{new Double(longitude), new Double(latitude), aid});
 		List<Contact> nearby = new ArrayList<Contact>();
 		DataSource ds = context.getBean("ds", DataSource.class);
 		Connection con = null;

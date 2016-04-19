@@ -1,4 +1,4 @@
-package com.moblong.geography.dto;
+package com.moblong.prophet.dto;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

@@ -1,4 +1,4 @@
-package com.moblong.geography.dto;
+package com.moblong.prophet.dto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
